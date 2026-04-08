@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin — Dhvit Mehta Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #111010;
+      --surface: #1a1917;
+      --surface2: #222120;
+      --border: #2e2c2a;
+      --gold: #b8963e;
+      --gold-dim: #7a6230;
+      --cream: #f0ebe0;
+      --muted: #6b6560;
+      --text: #e8e4dc;
+      --red: #c0392b;
+      --green: #2e7d52;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.7; min-height: 100vh; }
+
+    /* LOGIN */
+    #loginScreen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .login-box { width: 100%; max-width: 400px; border: 1px solid var(--border); padding: 48px; background: var(--surface); }
+    .login-logo { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 300; margin-bottom: 8px; color: var(--cream); }
+    .login-logo em { font-style: italic; color: var(--gold); }
+    .login-sub { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 40px; }
+    .field { margin-bottom: 20px; }
+    .field label { display: block; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .field input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 13px; outline: none; transition: border-color 0.2s; }
+    .field input:focus { border-color: var(--gold); }
+    .btn-primary { width: 100%; padding: 14px; background: var(--gold); color: #111; border: none; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
+    .btn-primary:hover { background: #c9a84c; }
+    .btn-primary:disabled { background: var(--gold-dim); cursor: not-allowed; }
+    .error-msg { color: #e57373; font-size: 11px; margin-top: 12px; min-height: 18px; }
+
+    /* TOPBAR */
+    #adminScreen { display: none; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 50; }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: var(--cream); }
+    .topbar-sub { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+    .btn-logout { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); background: none; border: 1px solid var(--border); padding: 8px 16px; cursor: pointer; font-family: 'DM Mono', monospace; transition: all 0.2s; }
+    .btn-logout:hover { color: var(--text); border-color: var(--muted); }
+    .view-site { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); background: none; border: 1px solid var(--gold-dim); padding: 8px 16px; cursor: pointer; font-family: 'DM Mono', monospace; text-decoration: none; transition: all 0.2s; }
+    .view-site:hover { background: var(--gold); color: #111; }
+
+    .dash-body { padding: 40px; }
+
+    /* TABS */
+    .term-tabs { display: flex; flex-wrap: wrap; gap: 0; margin-bottom: 2px; background: var(--border); }
+    .term-tab { padding: 12px 24px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; background: var(--surface); border: none; color: var(--muted); font-family: 'DM Mono', monospace; transition: all 0.2s; border-right: 1px solid var(--border); }
+    .term-tab:hover { background: var(--surface2); color: var(--text); }
+    .term-tab.active { background: var(--gold); color: #111; }
+
+    /* PANELS */
+    .courses-panel { display: none; flex-direction: column; gap: 2px; background: var(--border); }
+    .courses-panel.active { display: flex; }
+
+    .course-row { background: var(--surface); padding: 28px 32px; display: grid; grid-template-columns: 240px 1fr; gap: 36px; align-items: start; transition: background 0.2s; }
+    .course-row:hover { background: var(--surface2); }
+
+    .row-course-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 400; color: var(--cream); margin-bottom: 6px; line-height: 1.3; }
+    .row-grade { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+    .row-grade.perfect { color: #e57373; }
+    .row-grade.progress { color: var(--muted); }
+
+    /* RIGHT SIDE */
+    .row-right { display: flex; flex-direction: column; gap: 16px; }
+
+    /* Description */
+    .row-desc { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.6; resize: vertical; min-height: 72px; outline: none; transition: border-color 0.2s; }
+    .row-desc:focus { border-color: var(--gold); }
+    .row-desc::placeholder { color: var(--muted); }
+
+    /* Thumbnail */
+    .thumb-row { display: flex; align-items: center; gap: 12px; }
+    .thumb-drop { border: 1px dashed var(--border); padding: 10px 16px; font-size: 10px; letter-spacing: 0.15em; color: var(--muted); cursor: pointer; transition: all 0.2s; position: relative; white-space: nowrap; }
+    .thumb-drop:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .thumb-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .thumb-preview { width: 72px; height: 48px; object-fit: cover; border: 1px solid var(--border); display: none; }
+    .thumb-preview.visible { display: block; }
+
+    /* Uploaded files list */
+    .files-section-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .uploaded-files { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .uploaded-file-row { display: flex; align-items: center; gap: 10px; background: var(--bg); border: 1px solid var(--border); padding: 8px 12px; }
+    .uploaded-file-label { font-size: 11px; color: var(--text); flex: 1; }
+    .uploaded-file-link { font-size: 10px; color: var(--gold); text-decoration: none; letter-spacing: 0.1em; }
+    .uploaded-file-link:hover { text-decoration: underline; }
+    .btn-delete-file { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 4px; transition: color 0.2s; font-family: 'DM Mono', monospace; }
+    .btn-delete-file:hover { color: #e57373; }
+
+    /* Add file form */
+    .add-file-form { display: flex; flex-direction: column; gap: 8px; border: 1px dashed var(--border); padding: 16px; }
+    .add-file-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .file-label-input { flex: 1; min-width: 160px; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 9px 12px; font-family: 'DM Mono', monospace; font-size: 12px; outline: none; transition: border-color 0.2s; }
+    .file-label-input:focus { border-color: var(--gold); }
+    .file-label-input::placeholder { color: var(--muted); }
+    .file-pick-btn { border: 1px dashed var(--border); padding: 9px 14px; font-size: 10px; letter-spacing: 0.15em; color: var(--muted); cursor: pointer; transition: all 0.2s; position: relative; white-space: nowrap; font-family: 'DM Mono', monospace; background: none; }
+    .file-pick-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+    .file-pick-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .file-pick-btn.picked { border-color: var(--green); color: #4caf84; border-style: solid; }
+    .btn-add-file { padding: 9px 18px; background: none; border: 1px solid var(--gold-dim); color: var(--gold); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .btn-add-file:hover { background: var(--gold); color: #111; }
+    .btn-add-file:disabled { opacity: 0.4; cursor: not-allowed; }
+    .add-file-status { font-size: 10px; color: var(--muted); min-height: 14px; }
+    .add-file-status.ok { color: #4caf84; }
+    .add-file-status.err { color: #e57373; }
+
+    /* Save row */
+    .save-row { display: flex; align-items: center; gap: 16px; }
+    .btn-save { padding: 10px 24px; background: var(--gold); color: #111; border: none; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
+    .btn-save:hover { background: #c9a84c; }
+    .btn-save:disabled { background: var(--gold-dim); cursor: not-allowed; }
+    .save-status { font-size: 10px; color: var(--muted); min-height: 16px; }
+    .save-status.ok { color: #4caf84; }
+    .save-status.err { color: #e57373; }
+
+    .loading-state { text-align: center; padding: 60px; color: var(--muted); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; }
+    .dot { animation: blink 1.2s infinite; display: inline-block; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100%{opacity:0;}40%{opacity:1;} }
+
+    @media (max-width: 900px) {
+      .course-row { grid-template-columns: 1fr; }
+      .topbar { padding: 16px 20px; }
+      .dash-body { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Dhvit <em>Mehta</em></div>
+    <div class="login-sub">Portfolio Admin</div>
+    <div class="field"><label>Email</label><input type="email" id="emailInput" placeholder="your@email.com" autocomplete="email"/></div>
+    <div class="field"><label>Password</label><input type="password" id="passwordInput" placeholder="••••••••" autocomplete="current-password"/></div>
+    <button class="btn-primary" id="loginBtn" onclick="handleLogin()">Sign In →</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminScreen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Admin Dashboard</div>
+      <div class="topbar-sub">IIMB Portfolio · Dhvit Mehta</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <a href="index.html" class="view-site" target="_blank">View Site ↗</a>
+      <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="dash-body">
+    <div class="term-tabs" id="adminTermTabs">
+      <button class="term-tab active" data-term="Term 1">Term 1</button>
+      <button class="term-tab" data-term="Term 2">Term 2</button>
+      <button class="term-tab" data-term="Term 3">Term 3</button>
+      <button class="term-tab" data-term="Term 4">Term 4</button>
+      <button class="term-tab" data-term="Term 5">Term 5</button>
+      <button class="term-tab" data-term="Term 6">Term 6</button>
+    </div>
+    <div id="adminPanels"><div class="loading-state">Loading<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div></div>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://ncvpnczmgrduemebcccb.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_A-XWZzBpOV0300Xt42-YRw_DQwkRzX3';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const COURSES = {
+    "Term 1": [
+      { id:"t1_accounting", name:"Accounting for Decisions", grade:"A 3.92" },
+      { id:"t1_comm", name:"Advances in Business Communication", grade:"A 3.85" },
+      { id:"t1_ds1", name:"Decision Sciences I", grade:"A 4.00", perfect:true },
+      { id:"t1_econ", name:"Managerial Economics", grade:"A 3.73" },
+      { id:"t1_mktg", name:"Marketing Management", grade:"A 3.89" },
+      { id:"t1_org", name:"Organization Design", grade:"A 3.96" },
+    ],
+    "Term 2": [
+      { id:"t2_digcomm", name:"Communication in the Digital Age", grade:"A 3.75" },
+      { id:"t2_strat", name:"Competition and Strategy", grade:"A 3.87" },
+      { id:"t2_corpfin", name:"Corporate Finance", grade:"A 4.00", perfect:true },
+      { id:"t2_ds2", name:"Decision Sciences II", grade:"A 3.89" },
+      { id:"t2_people", name:"Managing People and Performance", grade:"A 4.00", perfect:true },
+      { id:"t2_ops", name:"Operations Management", grade:"A 3.76" },
+    ],
+    "Term 3": [
+      { id:"t3_ecom", name:"Analytics for E-commerce & Retail", grade:"A 3.61" },
+      { id:"t3_bgs", name:"Business, Government & Society", grade:"A 3.87" },
+      { id:"t3_entre", name:"Entrepreneurial Mindset & Action", grade:"A 3.90" },
+      { id:"t3_deriv", name:"Financial Derivatives", grade:"A 4.00", perfect:true },
+      { id:"t3_macro", name:"Macroeconomics", grade:"A 3.85" },
+      { id:"t3_digital", name:"Managing Digital Business", grade:"A 4.00", perfect:true },
+    ],
+    "Term 4": [
+      { id:"t4_intlecon", name:"Business, Finance & International Economy", grade:"A 3.87" },
+      { id:"t4_gck", name:"General Commercial Knowledge", grade:"A 3.96" },
+      { id:"t4_health", name:"Healthcare Economics", grade:"A 3.95" },
+      { id:"t4_sustain", name:"Responsible Business & Sustainability", grade:"A 4.00", perfect:true },
+      { id:"t4_sports", name:"Sports Analytics", grade:"A 4.00", perfect:true },
+      { id:"t4_research", name:"Quantile Regression Research", grade:"Excellent" },
+    ],
+    "Term 5": [
+      { id:"t5_crossfunc", name:"Analytics for Cross-functional Excellence", grade:"A 3.97" },
+      { id:"t5_ecosys", name:"Competition & Cooperation in Ecosystems", grade:"A 4.00", perfect:true },
+      { id:"t5_fintech", name:"Fintech: Reshaping Financial Services", grade:"B 3.27" },
+      { id:"t5_banks", name:"Management of Banks & Financial Institutions", grade:"A 3.97" },
+      { id:"t5_scm", name:"Supply Chain Management", grade:"A 3.83" },
+    ],
+    "Term 6": [
+      { id:"t6_dataviz", name:"Data Visualization & Storytelling", grade:"A 3.80" },
+      { id:"t6_qrm", name:"Quantitative Risk Management", grade:"A 3.72" },
+      { id:"t6_theatre", name:"Theatre for Executive Presence", grade:"A" },
+      { id:"t6_genai", name:"Predictive & Generative AI", grade:"A 4.00", perfect:true },
+      { id:"t6_wealth", name:"Wealth Management & Personal Financial Planning", grade:"A 3.81" },
+    ],
+  };
+
+  let projectData = {}; // course_id -> { description, thumbnail_url }
+  let fileData = {};    // course_id -> [{id, label, file_url}]
+  let activeTab = "Term 1";
+
+  // ── AUTH ──
+  async function handleLogin() {
+    const email = document.getElementById('emailInput').value.trim();
+    const pass = document.getElementById('passwordInput').value;
+    const btn = document.getElementById('loginBtn');
+    const err = document.getElementById('loginError');
+    err.textContent = '';
+    btn.disabled = true; btn.textContent = 'Signing in...';
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) { err.textContent = error.message; btn.disabled = false; btn.textContent = 'Sign In →'; }
+    else showAdmin();
+  }
+  document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+
+  async function handleLogout() {
+    await sb.auth.signOut();
+    document.getElementById('adminScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+  }
+
+  async function checkSession() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) showAdmin();
+  }
+
+  async function showAdmin() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'block';
+    await loadData();
+    renderPanels();
+  }
+
+  // ── DATA ──
+  async function loadData() {
+    const { data: projects } = await sb.from('projects').select('*');
+    const { data: files } = await sb.from('project_files').select('*');
+    projectData = {};
+    fileData = {};
+    if (projects) projects.forEach(p => { projectData[p.course_id] = p; });
+    if (files) files.forEach(f => {
+      if (!fileData[f.course_id]) fileData[f.course_id] = [];
+      fileData[f.course_id].push({ id: f.id, label: f.label, file_url: f.file_url });
+    });
+  }
+
+  // ── RENDER ──
+  function renderPanels() {
+    const container = document.getElementById('adminPanels');
+    container.innerHTML = '';
+    Object.entries(COURSES).forEach(([term, courses]) => {
+      const panel = document.createElement('div');
+      panel.className = 'courses-panel' + (term === activeTab ? ' active' : '');
+      panel.dataset.term = term;
+      courses.forEach(c => buildCourseRow(panel, c));
+      container.appendChild(panel);
+    });
+  }
+
+  function buildCourseRow(panel, c) {
+    const p = projectData[c.id] || {};
+    const files = fileData[c.id] || [];
+    const gradeClass = c.perfect ? 'perfect' : c.inprogress ? 'progress' : '';
+
+    const row = document.createElement('div');
+    row.className = 'course-row';
+    row.id = `row_${c.id}`;
+
+    const existingFilesHtml = files.map(f => `
+      <div class="uploaded-file-row" id="filerow_${f.id}">
+        <span class="uploaded-file-label">${f.label}</span>
+        <a class="uploaded-file-link" href="${f.file_url}" target="_blank">view ↗</a>
+        <button class="btn-delete-file" onclick="deleteFile('${f.id}','${c.id}')" title="Delete">×</button>
+      </div>`).join('');
+
+    row.innerHTML = `
+      <div>
+        <div class="row-course-name">${c.name}</div>
+        <div class="row-grade ${gradeClass}">${c.grade}</div>
+      </div>
+      <div class="row-right">
+        <textarea class="row-desc" id="desc_${c.id}" placeholder="Describe what this project covers, your approach, key learnings...">${p.description || ''}</textarea>
+
+        <div class="thumb-row">
+          <label class="thumb-drop" id="thumbDrop_${c.id}">
+            ${p.thumbnail_url ? '✓ Thumbnail — click to replace' : '+ Thumbnail image (optional)'}
+            <input type="file" id="thumb_${c.id}" accept=".png,.jpg,.jpeg,.webp" onchange="onThumbChange('${c.id}')"/>
+          </label>
+          <img class="thumb-preview ${p.thumbnail_url ? 'visible' : ''}" id="thumbPreview_${c.id}" src="${p.thumbnail_url || ''}" alt=""/>
+        </div>
+
+        <div>
+          <div class="files-section-label">Uploaded files</div>
+          <div class="uploaded-files" id="filesList_${c.id}">${existingFilesHtml || '<div style="font-size:10px;color:var(--muted)">No files yet</div>'}</div>
+
+          <div class="add-file-form">
+            <div style="font-size:10px;letter-spacing:0.15em;color:var(--muted);text-transform:uppercase;margin-bottom:4px">Add a file</div>
+            <div class="add-file-row">
+              <input class="file-label-input" id="newFileLabel_${c.id}" placeholder="Label (e.g. Final Report, Case Study)" />
+              <label class="file-pick-btn" id="newFilePick_${c.id}">
+                Choose file
+                <input type="file" id="newFileInput_${c.id}" accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg" onchange="onNewFilePick('${c.id}')"/>
+              </label>
+              <button class="btn-add-file" id="addFileBtn_${c.id}" onclick="addFile('${c.id}')">Upload →</button>
+            </div>
+            <div class="add-file-status" id="addFileStatus_${c.id}"></div>
+          </div>
+        </div>
+
+        <div class="save-row">
+          <button class="btn-save" onclick="saveProject('${c.id}')">Save description & thumbnail →</button>
+          <div class="save-status" id="saveStatus_${c.id}"></div>
+        </div>
+      </div>`;
+    panel.appendChild(row);
+  }
+
+  function onThumbChange(courseId) {
+    const input = document.getElementById(`thumb_${courseId}`);
+    const drop = document.getElementById(`thumbDrop_${courseId}`);
+    const preview = document.getElementById(`thumbPreview_${courseId}`);
+    if (input.files[0]) {
+      drop.childNodes[0].textContent = `✓ ${input.files[0].name}`;
+      const reader = new FileReader();
+      reader.onload = e => { preview.src = e.target.result; preview.classList.add('visible'); };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function onNewFilePick(courseId) {
+    const input = document.getElementById(`newFileInput_${courseId}`);
+    const btn = document.getElementById(`newFilePick_${courseId}`);
+    if (input.files[0]) {
+      btn.classList.add('picked');
+      btn.childNodes[0].textContent = `✓ ${input.files[0].name}`;
+    }
+  }
+
+  async function saveProject(courseId) {
+    const btn = document.querySelector(`#row_${courseId} .btn-save`);
+    const status = document.getElementById(`saveStatus_${courseId}`);
+    btn.disabled = true; btn.textContent = 'Saving...';
+    status.textContent = ''; status.className = 'save-status';
+
+    try {
+      const description = document.getElementById(`desc_${courseId}`).value.trim();
+      const thumbInput = document.getElementById(`thumb_${courseId}`);
+      const existing = projectData[courseId] || {};
+      let thumbnail_url = existing.thumbnail_url || null;
+
+      if (thumbInput.files[0]) {
+        const file = thumbInput.files[0];
+        const ext = file.name.split('.').pop();
+        const path = `thumbnails/${courseId}_${Date.now()}.${ext}`;
+        const { error: upErr } = await sb.storage.from('portfolio-files').upload(path, file, { upsert: true });
+        if (upErr) throw upErr;
+        thumbnail_url = sb.storage.from('portfolio-files').getPublicUrl(path).data.publicUrl;
+      }
+
+      const { error } = await sb.from('projects').upsert({ course_id: courseId, description, thumbnail_url, updated_at: new Date().toISOString() }, { onConflict: 'course_id' });
+      if (error) throw error;
+      projectData[courseId] = { course_id: courseId, description, thumbnail_url };
+      status.textContent = 'Saved ✓'; status.classList.add('ok');
+    } catch(e) { status.textContent = 'Error: ' + e.message; status.classList.add('err'); }
+
+    btn.disabled = false; btn.textContent = 'Save description & thumbnail →';
+  }
+
+  async function addFile(courseId) {
+    const labelInput = document.getElementById(`newFileLabel_${courseId}`);
+    const fileInput = document.getElementById(`newFileInput_${courseId}`);
+    const addBtn = document.getElementById(`addFileBtn_${courseId}`);
+    const status = document.getElementById(`addFileStatus_${courseId}`);
+
+    const label = labelInput.value.trim();
+    const file = fileInput.files[0];
+
+    if (!label) { status.textContent = 'Please enter a label.'; status.className = 'add-file-status err'; return; }
+    if (!file) { status.textContent = 'Please choose a file.'; status.className = 'add-file-status err'; return; }
+
+    addBtn.disabled = true; addBtn.textContent = 'Uploading...';
+    status.textContent = ''; status.className = 'add-file-status';
+
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `projects/${courseId}_${Date.now()}.${ext}`;
+      const { error: upErr } = await sb.storage.from('portfolio-files').upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const file_url = sb.storage.from('portfolio-files').getPublicUrl(path).data.publicUrl;
+
+      const { data, error: dbErr } = await sb.from('project_files').insert({ course_id: courseId, label, file_url }).select().single();
+      if (dbErr) throw dbErr;
+
+      // update local state
+      if (!fileData[courseId]) fileData[courseId] = [];
+      fileData[courseId].push({ id: data.id, label, file_url });
+
+      // add to DOM
+      const list = document.getElementById(`filesList_${courseId}`);
+      const emptyMsg = list.querySelector('div[style]');
+      if (emptyMsg) emptyMsg.remove();
+      list.insertAdjacentHTML('beforeend', `
+        <div class="uploaded-file-row" id="filerow_${data.id}">
+          <span class="uploaded-file-label">${label}</span>
+          <a class="uploaded-file-link" href="${file_url}" target="_blank">view ↗</a>
+          <button class="btn-delete-file" onclick="deleteFile('${data.id}','${courseId}')" title="Delete">×</button>
+        </div>`);
+
+      // reset form
+      labelInput.value = '';
+      fileInput.value = '';
+      const pickBtn = document.getElementById(`newFilePick_${courseId}`);
+      pickBtn.classList.remove('picked');
+      pickBtn.childNodes[0].textContent = 'Choose file';
+      status.textContent = 'File added ✓'; status.className = 'add-file-status ok';
+    } catch(e) { status.textContent = 'Error: ' + e.message; status.className = 'add-file-status err'; }
+
+    addBtn.disabled = false; addBtn.textContent = 'Upload →';
+  }
+
+  async function deleteFile(fileId, courseId) {
+    if (!confirm('Delete this file?')) return;
+    const { error } = await sb.from('project_files').delete().eq('id', fileId);
+    if (error) { alert('Error deleting: ' + error.message); return; }
+    document.getElementById(`filerow_${fileId}`)?.remove();
+    if (fileData[courseId]) fileData[courseId] = fileData[courseId].filter(f => f.id !== fileId);
+    const list = document.getElementById(`filesList_${courseId}`);
+    if (list && list.children.length === 0) list.innerHTML = '<div style="font-size:10px;color:var(--muted)">No files yet</div>';
+  }
+
+  // TABS
+  document.getElementById('adminTermTabs').addEventListener('click', e => {
+    if (!e.target.matches('.term-tab')) return;
+    activeTab = e.target.dataset.term;
+    document.querySelectorAll('#adminTermTabs .term-tab').forEach(t => t.classList.toggle('active', t.dataset.term === activeTab));
+    document.querySelectorAll('#adminPanels .courses-panel').forEach(p => p.classList.toggle('active', p.dataset.term === activeTab));
+  });
+
+  checkSession();
+</script>
+</body>
+</html>
