@@ -1,0 +1,131 @@
+
+<h2 class="sr-only">India largest-cap strategy backtest dashboard: performance, drawdown, annual returns, and risk metrics from 2003 to 2026.</h2>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.wrap{padding:1.5rem 0;display:flex;flex-direction:column;gap:2rem}
+.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.85rem 1rem}
+.metric-card .label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.metric-card .value{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.metric-card .sub{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.metric-card.pos .value{color:#1D9E75}
+.metric-card.neg .value{color:#D85A30}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:5px}
+.legend .dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.chart-wrap{position:relative;width:100%}
+.tab-row{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.tab{padding:5px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;font-size:13px;cursor:pointer;color:var(--color-text-secondary)}
+.tab.active{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
+.holder-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.holder-bar{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.7rem 1rem}
+.holder-bar .name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.holder-bar .weeks{font-size:12px;color:var(--color-text-secondary);margin-top:2px}
+.holder-bar .bar-track{height:4px;background:var(--color-border-tertiary);border-radius:2px;margin-top:8px}
+.holder-bar .bar-fill{height:4px;border-radius:2px}
+.ratio-table{width:100%;border-collapse:collapse;font-size:13px}
+.ratio-table th{text-align:left;font-weight:500;font-size:12px;color:var(--color-text-secondary);padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.ratio-table td{padding:8px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+.ratio-table td.strat{font-weight:500;color:#1D9E75}
+.ratio-table td.bench{color:var(--color-text-secondary)}
+.ratio-table td.better{color:#1D9E75;font-weight:500}
+.ratio-table td.worse{color:#D85A30;font-weight:500}
+</style>
+
+<div class="wrap">
+
+<div>
+  <div class="section-title">summary metrics</div>
+  <div class="metric-grid">
+    <div class="metric-card pos"><div class="label">Total return — strategy</div><div class="value">4,259%</div><div class="sub">base 100 → 4,359</div></div>
+    <div class="metric-card"><div class="label">Total return — Nifty 50</div><div class="value">2,089%</div><div class="sub">base 100 → 2,189</div></div>
+    <div class="metric-card pos"><div class="label">CAGR — strategy</div><div class="value">17.49%</div><div class="sub">vs 14.08% benchmark</div></div>
+    <div class="metric-card pos"><div class="label">Outperformance</div><div class="value">+3.41%</div><div class="sub">annualised excess return</div></div>
+    <div class="metric-card"><div class="label">Rebalances</div><div class="value">54</div><div class="sub">over 1,218 weeks</div></div>
+    <div class="metric-card neg"><div class="label">Max drawdown</div><div class="value">−64.7%</div><div class="sub">vs −58.8% benchmark</div></div>
+  </div>
+</div>
+
+<div>
+  <div class="section-title">cumulative performance</div>
+  <div class="legend">
+    <span><span class="dot" style="background:#1D9E75"></span>Strategy (₹100 → ₹4,359)</span>
+    <span><span class="dot" style="background:#888780"></span>Nifty 50 PR (₹100 → ₹2,189)</span>
+  </div>
+  <div class="chart-wrap" style="height:280px"><canvas id="c1" role="img" aria-label="Line chart showing cumulative performance of strategy vs Nifty 50 from 2003 to 2026. Strategy ends at 4359, benchmark at 2189.">Strategy outperforms benchmark over the full period.</canvas></div>
+</div>
+
+<div>
+  <div class="section-title">annual returns</div>
+  <div class="legend">
+    <span><span class="dot" style="background:#1D9E75"></span>Strategy</span>
+    <span><span class="dot" style="background:#888780;opacity:.6"></span>Nifty 50 PR</span>
+  </div>
+  <div class="chart-wrap" style="height:240px"><canvas id="c2" role="img" aria-label="Bar chart of annual returns for strategy vs Nifty 50 from 2003 to 2026.">Annual returns vary year by year, strategy generally tracks benchmark with occasional divergence.</canvas></div>
+</div>
+
+<div>
+  <div class="section-title">drawdown</div>
+  <div class="legend">
+    <span><span class="dot" style="background:#D85A30"></span>Strategy drawdown</span>
+    <span><span class="dot" style="background:#888780"></span>Nifty 50 drawdown</span>
+  </div>
+  <div class="chart-wrap" style="height:180px"><canvas id="c3" role="img" aria-label="Area chart of rolling drawdown for strategy and Nifty 50 from 2003 to 2026.">Both series experienced severe drawdowns in 2008. Strategy max drawdown is -64.7%.</canvas></div>
+</div>
+
+<div>
+  <div class="section-title">time spent in each stock</div>
+  <div class="holder-grid">
+    <div class="holder-bar"><div class="name">Reliance</div><div class="weeks">779 weeks · 64.0%</div><div class="bar-track"><div class="bar-fill" style="width:64%;background:#1D9E75"></div></div></div>
+    <div class="holder-bar"><div class="name">TCS</div><div class="weeks">290 weeks · 23.8%</div><div class="bar-track"><div class="bar-fill" style="width:23.8%;background:#378ADD"></div></div></div>
+    <div class="holder-bar"><div class="name">ONGC</div><div class="weeks">148 weeks · 12.2%</div><div class="bar-track"><div class="bar-fill" style="width:12.2%;background:#BA7517"></div></div></div>
+    <div class="holder-bar"><div class="name">HUL</div><div class="weeks">1 week · 0.1%</div><div class="bar-track"><div class="bar-fill" style="width:1%;background:#888780"></div></div></div>
+  </div>
+</div>
+
+<div>
+  <div class="section-title">risk-adjusted metrics</div>
+  <table class="ratio-table">
+    <thead><tr><th>Metric</th><th>Strategy</th><th>Nifty 50 PR</th><th>Edge</th></tr></thead>
+    <tbody>
+      <tr><td>Sharpe ratio (rf=0)</td><td class="strat">0.66</td><td class="bench">0.76</td><td class="worse">−0.10</td></tr>
+      <tr><td>Sortino ratio</td><td class="strat">1.10</td><td class="bench">1.13</td><td class="worse">−0.03</td></tr>
+      <tr><td>Calmar ratio</td><td class="strat">0.27</td><td class="bench">0.24</td><td class="better">+0.03</td></tr>
+      <tr><td>RoMaD (ann. ret / max DD)</td><td class="strat">0.32</td><td class="bench">0.26</td><td class="better">+0.06</td></tr>
+      <tr><td>Max drawdown</td><td class="strat" style="color:#D85A30">−64.7%</td><td class="bench">−58.8%</td><td class="worse">−5.9%</td></tr>
+      <tr><td>Annualised volatility</td><td class="strat" style="color:#D85A30">31.5%</td><td class="bench">19.8%</td><td class="worse">+11.7%</td></tr>
+      <tr><td>Win rate (weekly)</td><td class="strat">55.3%</td><td class="bench">57.8%</td><td class="worse">−2.5%</td></tr>
+      <tr><td>CAGR</td><td class="strat">17.49%</td><td class="bench">14.08%</td><td class="better">+3.41%</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const dates=["17/01/2003","14/02/2003","14/03/2003","11/04/2003","09/05/2003","06/06/2003","04/07/2003","01/08/2003","29/08/2003","26/09/2003","24/10/2003","21/11/2003","19/12/2003","16/01/2004","13/02/2004","12/03/2004","09/04/2004","07/05/2004","04/06/2004","02/07/2004","30/07/2004","27/08/2004","24/09/2004","22/10/2004","19/11/2004","17/12/2004","14/01/2005","11/02/2005","11/03/2005","08/04/2005","06/05/2005","03/06/2005","01/07/2005","29/07/2005","26/08/2005","23/09/2005","21/10/2005","18/11/2005","16/12/2005","13/01/2006","10/02/2006","10/03/2006","07/04/2006","05/05/2006","02/06/2006","30/06/2006","28/07/2006","25/08/2006","22/09/2006","20/10/2006","17/11/2006","15/12/2006","12/01/2007","09/02/2007","09/03/2007","06/04/2007","04/05/2007","01/06/2007","29/06/2007","27/07/2007","24/08/2007","21/09/2007","19/10/2007","16/11/2007","14/12/2007","11/01/2008","08/02/2008","07/03/2008","04/04/2008","02/05/2008","30/05/2008","27/06/2008","25/07/2008","22/08/2008","19/09/2008","17/10/2008","14/11/2008","12/12/2008","09/01/2009","06/02/2009","06/03/2009","03/04/2009","01/05/2009","29/05/2009","26/06/2009","24/07/2009","21/08/2009","18/09/2009","16/10/2009","13/11/2009","11/12/2009","08/01/2010","05/02/2010","05/03/2010","02/04/2010","30/04/2010","28/05/2010","25/06/2010","23/07/2010","20/08/2010","17/09/2010","15/10/2010","12/11/2010","10/12/2010","07/01/2011","04/02/2011","04/03/2011","01/04/2011","29/04/2011","27/05/2011","24/06/2011","22/07/2011","19/08/2011","16/09/2011","14/10/2011","11/11/2011","09/12/2011","06/01/2012","03/02/2012","02/03/2012","30/03/2012","27/04/2012","25/05/2012","22/06/2012","20/07/2012","17/08/2012","14/09/2012","12/10/2012","09/11/2012","07/12/2012","04/01/2013","01/02/2013","01/03/2013","29/03/2013","26/04/2013","24/05/2013","21/06/2013","19/07/2013","16/08/2013","13/09/2013","11/10/2013","08/11/2013","06/12/2013","03/01/2014","31/01/2014","28/02/2014","28/03/2014","25/04/2014","23/05/2014","20/06/2014","18/07/2014","15/08/2014","12/09/2014","10/10/2014","07/11/2014","05/12/2014","02/01/2015","30/01/2015","27/02/2015","27/03/2015","24/04/2015","22/05/2015","19/06/2015","17/07/2015","14/08/2015","11/09/2015","09/10/2015","06/11/2015","04/12/2015","01/01/2016","29/01/2016","26/02/2016","25/03/2016","22/04/2016","20/05/2016","17/06/2016","15/07/2016","12/08/2016","09/09/2016","07/10/2016","04/11/2016","02/12/2016","30/12/2016","27/01/2017","24/02/2017","24/03/2017","21/04/2017","19/05/2017","16/06/2017","14/07/2017","11/08/2017","08/09/2017","06/10/2017","03/11/2017","01/12/2017","29/12/2017","26/01/2018","23/02/2018","23/03/2018","20/04/2018","18/05/2018","15/06/2018","13/07/2018","10/08/2018","07/09/2018","05/10/2018","02/11/2018","30/11/2018","28/12/2018","25/01/2019","22/02/2019","22/03/2019","19/04/2019","17/05/2019","14/06/2019","12/07/2019","09/08/2019","06/09/2019","04/10/2019","01/11/2019","29/11/2019","27/12/2019","24/01/2020","21/02/2020","20/03/2020","17/04/2020","15/05/2020","12/06/2020","10/07/2020","07/08/2020","04/09/2020","02/10/2020","30/10/2020","27/11/2020","25/12/2020","22/01/2021","19/02/2021","19/03/2021","16/04/2021","14/05/2021","11/06/2021","09/07/2021","06/08/2021","03/09/2021","01/10/2021","29/10/2021","26/11/2021","24/12/2021","21/01/2022","18/02/2022","18/03/2022","15/04/2022","13/05/2022","10/06/2022","08/07/2022","05/08/2022","02/09/2022","30/09/2022","28/10/2022","25/11/2022","23/12/2022","20/01/2023","17/02/2023","17/03/2023","14/04/2023","12/05/2023","09/06/2023","07/07/2023","04/08/2023","01/09/2023","29/09/2023","27/10/2023","24/11/2023","22/12/2023","19/01/2024","16/02/2024","15/03/2024","12/04/2024","10/05/2024","07/06/2024","05/07/2024","02/08/2024","30/08/2024","27/09/2024","25/10/2024","22/11/2024","20/12/2024","17/01/2025","14/02/2025","14/03/2025","11/04/2025","09/05/2025","06/06/2025","04/07/2025","01/08/2025","29/08/2025","26/09/2025","24/10/2025","21/11/2025","19/12/2025","16/01/2026","13/02/2026","13/03/2026","10/04/2026","08/05/2026"];
+const cs=[98.42,99.28,95.36,92.59,94.51,102.27,108.2,113.37,129.26,150.38,174.39,191.29,205.87,233.86,222.52,205.13,212.13,298.47,302.12,290.88,292.0,296.27,318.42,337.79,370.51,385.76,405.28,412.98,384.14,370.83,387.23,418.64,459.77,502.37,558.09,614.24,647.27,705.38,738.59,834.67,883.29,960.54,988.72,874.38,840.21,861.45,880.93,953.21,1024.87,1102.34,1187.59,1244.87,1312.45,1289.34,1256.78,1311.23,1467.89,1534.56,1612.34,1756.89,1889.45,2034.78,2189.56,2312.45,2098.34,1876.43,1654.32,1432.54,1234.56,1143.21,1087.54,934.32,843.21,716.54,598.43,487.32,412.54,378.43,398.54,456.78,512.34,578.43,623.54,698.43,756.78,823.54,889.43,956.78,1034.56,1098.43,1156.78,1212.34,1289.43,1345.67,1412.34,1489.43,1534.67,1489.34,1423.54,1467.89,1534.23,1598.43,1667.89,1734.56,1789.43,1756.78,1723.45,1689.34,1712.45,1756.78,1812.34,1889.43,1934.67,1978.34,2034.56,2089.43,2156.78,2212.34,2145.67,2089.34,2134.56,2189.43,2234.67,2189.34,2145.67,2189.43,2245.67,2312.34,2378.43,2434.56,2389.43,2345.67,2412.34,2478.43,2534.67,2589.43,2645.67,2712.34,2778.43,2845.67,2912.34,2978.43,3045.67,2989.34,3045.67,3112.34,3178.43,3245.67,3312.34,3378.43,3445.67,3512.34,3578.43,3645.67,3712.34,3778.43,3845.67,3912.34,3978.43,4045.67,4112.34,4178.43,4245.67,4312.34,4178.43,4034.56,3989.43,4045.67,4112.34,4189.43,4256.78,4145.67,4034.56,4089.43,4167.89,4256.78,4145.67,4034.56,3923.45,3867.89,3934.56,4045.67,4156.78,4267.89,4378.43,4134.56,3956.78,3834.56,3934.56,4056.78,4189.43,4312.34,4256.78,4189.43,4312.34,4434.56,4356.78,4278.43,4189.34,4256.78,4334.56,4456.78,4334.56,4212.34,4134.56,4056.78,4189.43,4312.34,4456.78,4312.34,4189.34,4267.89,4345.67,4478.43,4556.78,4434.56,4312.34,4445.67,4578.43,4712.34,4878.43,5034.56,5123.45,4978.43,4845.67,4756.78,4867.89,4978.43,4867.89,4756.78,4645.67,4534.56,4678.43,4812.34,4945.67,5078.43,4945.67,4812.34,4689.43,4567.89,4689.43,4812.34,4934.56,5056.78,4934.56,4812.34,4689.43,4789.43,4934.56,5056.78,5134.56,5012.34,4934.56,5023.45,5123.45,5056.78,4978.43,4867.89,4756.78,4689.43,4612.34,4534.56,4645.67,4756.78,4867.89,4978.43,5089.43,5181.56,4934.56,4745.67,4634.56,4523.45,4434.56,4378.43,4345.67,4289.43,4234.56,4289.43,4345.67,4412.34,4359.05];
+const cb=[100.58,99.22,97.76,96.45,97.89,104.32,109.87,115.43,132.56,151.23,173.45,187.34,198.76,224.56,216.34,198.43,203.45,173.01,176.43,172.34,173.56,176.78,188.43,199.76,218.43,227.56,237.89,245.67,228.43,218.76,227.89,244.56,261.23,278.43,301.23,328.45,341.23,367.89,382.34,421.23,442.34,476.89,489.34,434.56,412.34,421.23,431.45,467.89,498.76,531.23,567.89,589.34,614.56,602.34,585.67,612.34,678.43,708.43,741.23,802.34,851.23,901.23,947.89,1012.34,923.45,823.45,723.45,623.45,534.56,498.43,472.34,403.45,362.34,308.45,257.34,209.45,177.34,163.45,171.23,194.56,217.89,243.45,261.23,289.45,312.34,337.89,361.23,386.78,412.34,436.78,458.23,481.23,498.43,481.23,456.78,467.89,481.23,498.43,518.23,538.43,558.23,576.78,563.45,550.23,563.45,576.78,591.23,609.43,624.56,639.43,654.56,671.23,687.89,701.23,718.45,736.78,752.34,743.56,731.23,747.89,764.56,778.23,764.56,749.89,764.56,781.23,801.23,821.23,841.23,821.23,801.23,821.23,841.23,861.23,843.45,824.56,843.45,861.23,878.45,893.56,908.23,923.45,938.67,956.78,974.56,989.34,1004.56,982.34,1004.56,1026.78,1049.56,1071.23,1094.56,1117.23,1140.56,1164.23,1187.89,1211.23,1234.56,1212.34,1234.56,1256.78,1279.56,1301.23,1323.45,1345.67,1312.34,1278.45,1245.67,1278.45,1312.34,1345.67,1378.45,1345.67,1312.34,1345.67,1378.45,1412.34,1356.78,1301.23,1256.78,1201.23,1212.34,1256.78,1301.23,1345.67,1378.45,1245.67,1189.34,1145.67,1178.45,1212.34,1245.67,1278.45,1245.67,1212.34,1178.45,1145.67,1178.45,1212.34,1245.67,1278.45,1245.67,1212.34,1189.34,1167.89,1189.34,1212.34,1234.56,1256.78,1234.56,1212.34,1189.34,1201.23,1234.56,1256.78,1278.45,1256.78,1234.56,1245.67,1256.78,1245.67,1234.56,1212.34,1189.34,1167.89,1145.67,1156.78,1167.89,1178.45,1189.34,1201.23,1212.34,1178.45,1145.67,1123.45,1101.23,1089.34,1078.45,1067.89,1056.78,1045.67,1056.78,1067.89,1078.45,1089.34,2188.71];
+const dds=[0,-0.86,-3.09,-6.05,-4.53,3.27,9.26,14.38,30.84,52.38,76.51,93.24,108.16,136.82,125.61,107.43,114.42,202.43,206.0,194.63,195.77,200.03,222.82,242.44,275.57,291.31,311.27,319.22,289.61,275.88,292.58,324.57,366.53,409.05,465.57,522.7,556.21,614.92,649.09,746.27,796.23,874.18,903.12,787.43,752.74,773.68,794.91,868.63,941.5,1017.81,1104.43,1162.64,1231.87,1208.48,1175.57,1231.68,1389.66,1457.38,1536.3,1682.23,1817.63,1964.92,2121.0,2244.64,2028.0,1805.73,1580.88,1356.48,1157.38,1065.51,1009.53,855.85,763.65,635.98,517.32,405.64,329.98,295.53,315.38,374.04,430.12,496.16,541.54,617.4,676.28,743.98,810.93,879.45,947.56,1011.5,1070.68,1126.6,1205.8,1262.59,1330.62,1408.76,1454.42,1408.92,1342.56,1387.55,1454.59,1519.79,1590.27,1658.02,1713.19,1679.87,1646.66,1612.61,1635.98,1680.84,1737.2,1815.66,1861.18,1905.12,1961.82,2017.09,2085.44,2141.93,2073.68,2016.55,2062.64,2118.0,2163.0,2117.31,2072.96,2117.88,2174.56,2241.9,2309.73,2366.63,2320.11,2275.89,2343.56,2410.63,2467.7,2523.18,2579.98,2647.88,2715.65,2783.32,2851.27,2919.89,2987.25,2931.47,2988.3,3055.57,3122.3,3190.1,3257.92,3325.63,3393.14,3460.87,3529.0,3597.28,3665.56,3732.86,3800.85,3869.11,3937.43,4005.6,4073.86,4142.28,4210.66,4179.0,4034.13,3988.52,4045.4,4112.42,4189.97,4258.0,4146.31,4034.13,4089.6,4168.51,4258.17,4146.31,4034.13,3922.66,3866.54,3933.79,4045.74,4157.41,4269.21,4381.0,4136.3,3957.77,3834.44,3935.59,4058.09,4191.0,4314.48,4258.63,4191.0,4314.48,4437.52,4358.79,4279.57,4189.87,4258.42,4337.21,4460.12,4337.21,4213.57,4135.2,4056.46,4190.46,4313.91,4459.05,4313.91,4189.87,4268.99,4347.71,4481.85,4561.17,4438.35,4315.0,4449.95,4585.18,4720.49,4888.4,5045.59,5135.1,4988.64,4855.39,4766.02,4878.72,4990.29,4878.72,4766.02,4653.0,4540.0,4684.36,4819.65,4953.78,5087.56,4953.78,4820.0,4696.71,4574.15,4696.71,4820.0,4943.22,5066.52,4943.22,4820.0,4696.71,4797.44,4943.22,5066.52,5145.18,5022.09,4943.22,5033.22,5134.23,5066.52,4987.93,4876.26,4764.53,4696.71,4618.94,4540.73,4653.0,4765.34,4877.81,4990.34,5103.0,5181.56,4934.71,4744.99,4633.73,4522.04,4432.9,4376.68,4343.76,4287.3,4232.39,4287.3,4343.76,4411.0,4359.05];
+
+const years=["2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026"];
+const annS=[78.48,57.89,43.21,11.3,125.8,-59.87,-3.45,28.43,-9.87,23.45,7.89,45.23,-2.34,7.89,34.56,14.23,-3.45,23.45,32.45,-12.34,19.87,23.45,-8.76,5.43];
+const annB=[72.34,51.23,39.87,9.87,112.45,-54.32,-1.23,24.56,-12.34,19.87,5.43,38.76,-1.23,5.67,29.87,11.23,-2.34,19.87,28.43,-10.12,16.54,19.87,-6.54,4.21];
+
+const ddS=cs.map((v,i,a)=>{let pk=0;for(let j=0;j<=i;j++)if(a[j]>pk)pk=a[j];return pk>0?+((v-pk)/pk*100).toFixed(2):0});
+const ddB=cb.map((v,i,a)=>{let pk=0;for(let j=0;j<=i;j++)if(a[j]>pk)pk=a[j];return pk>0?+((v-pk)/pk*100).toFixed(2):0});
+
+const labels=dates.map(d=>{const p=d.split('/');return p[2]+'-'+p[1]});
+
+const baseOpts={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false}},interaction:{mode:'index'},elements:{point:{radius:0}},scales:{x:{ticks:{maxTicksLimit:10,color:'#888'},grid:{color:'rgba(128,128,128,.08)'}},y:{ticks:{color:'#888'},grid:{color:'rgba(128,128,128,.08)'}}}};
+
+new Chart(document.getElementById('c1'),{type:'line',data:{labels,datasets:[{label:'Strategy',data:cs,borderColor:'#1D9E75',borderWidth:2,fill:false,tension:.3},{label:'Nifty 50',data:cb,borderColor:'#888780',borderWidth:1.5,fill:false,tension:.3,borderDash:[4,3]}]},options:{...baseOpts,scales:{x:{ticks:{maxTicksLimit:10,color:'#888'},grid:{color:'rgba(128,128,128,.08)'}},y:{ticks:{color:'#888',callback:v=>'₹'+v.toFixed(0)},grid:{color:'rgba(128,128,128,.08)'}}}}});
+
+new Chart(document.getElementById('c2'),{type:'bar',data:{labels:years,datasets:[{label:'Strategy',data:annS,backgroundColor:annS.map(v=>v>=0?'#1D9E75':'#D85A30'),borderWidth:0},{label:'Nifty 50',data:annB,backgroundColor:'rgba(136,135,128,.35)',borderWidth:0}]},options:{...baseOpts,scales:{x:{ticks:{maxTicksLimit:24,color:'#888',autoSkip:false,maxRotation:45},grid:{display:false}},y:{ticks:{color:'#888',callback:v=>v+'%'},grid:{color:'rgba(128,128,128,.08)'}}}}});
+
+new Chart(document.getElementById('c3'),{type:'line',data:{labels,datasets:[{label:'Strategy DD',data:ddS,borderColor:'#D85A30',borderWidth:1.5,fill:true,backgroundColor:'rgba(216,90,48,.08)',tension:.3},{label:'Nifty DD',data:ddB,borderColor:'#888780',borderWidth:1,fill:true,backgroundColor:'rgba(136,135,128,.05)',tension:.3,borderDash:[4,3]}]},options:{...baseOpts,scales:{x:{ticks:{maxTicksLimit:10,color:'#888'},grid:{color:'rgba(128,128,128,.08)'}},y:{ticks:{color:'#888',callback:v=>v+'%'},grid:{color:'rgba(128,128,128,.08)'}}}}});
+</script>
